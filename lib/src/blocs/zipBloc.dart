@@ -9,7 +9,6 @@ class ZipBloc {
   }
 
   ZipBloc() {
-    //todo: handle error
     _personInfo.scan((List<String> list, String personInfo, _) {
       list.add(personInfo);
       return list;
@@ -21,20 +20,35 @@ class ZipBloc {
   Stream<List<String>> get personInfoList => _personInfoList.stream;
 
   fetchData(List<int> ids) {
-    Observable.fromIterable(ids)
-        .flatMap((id) {
-          final payObservable = Observable.fromFuture(_fetchPay(id));
-          return Observable.fromFuture(_fetchPerson(id))
-              .zipWith(
-                payObservable,
-                (String name, int pay) {
-                  return "$name get $pay";
-                },
-              )
-              .onErrorReturn("-1")
-              .where((value) => value != "-1");
-        })
-        .pipe(_personInfo);
+    Observable.fromIterable(ids).flatMap((id) {
+      final payObservable = Observable.fromFuture(_fetchPay(id));
+      return Observable.fromFuture(_fetchPerson(id))
+          .zipWith(
+            payObservable,
+            (String name, int pay) {
+              return "$name get $pay";
+            },
+          )
+          .onErrorReturn("-1")
+          .where((value) => value != "-1");
+    }).pipe(_personInfo);
+  }
+
+  testStreamError() {
+    Observable.fromIterable([1, 2, 3, 4, 5]).map((int number) {
+      if (number == 3) {
+        throw ("test error");
+      } else {
+        return number;
+      }
+      // return number;
+    }).listen((int number) {
+      print("number: $number");
+    }, onError: (error) {
+      print("error: ${error.toString()}");
+    }, onDone: () {
+      print("done");
+    }, cancelOnError: false);
   }
 
   Future<String> _fetchPerson(int id) async {

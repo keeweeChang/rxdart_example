@@ -5,7 +5,7 @@ class DebounceBloc {
   final _likeToServer = PublishSubject<bool>();
   Stream<bool> get like => _like.stream;
   Stream<bool> get likeToSever => _likeToServer.stream;
-  Bloc() {
+  DebounceBloc() {
     _like.debounce(Duration(seconds: 1)).pipe(_likeToServer);
   }
 
